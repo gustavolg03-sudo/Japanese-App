@@ -887,7 +887,127 @@
 
     <script>
         // ============================================
-        // DADOS DE VOCABULÁRIO
+        // GERADOR DE EXERCÍCIOS AUTOMÁTICO
+        // ============================================
+        function generateExercisesFromVocabulary() {
+            const allExercises = [];
+            const levels = ['A1', 'A2', 'B1', 'B2'];
+            
+            levels.forEach(level => {
+                const levelData = vocabularyData[level];
+                if (!levelData) return;
+                
+                // Coletar todas as palavras do nível
+                const allWords = [];
+                Object.values(levelData).forEach(category => {
+                    if (Array.isArray(category)) {
+                        allWords.push(...category);
+                    }
+                });
+                
+                if (allWords.length === 0) return;
+                
+                // Remover duplicatas baseado em kanji
+                const uniqueWords = [];
+                const seenKanji = new Set();
+                allWords.forEach(word => {
+                    if (!seenKanji.has(word.kanji)) {
+                        seenKanji.add(word.kanji);
+                        uniqueWords.push(word);
+                    }
+                });
+                
+                // Garantir pelo menos 500 exercícios por nível
+                const exercisesNeeded = 500;
+                let exercisesGenerated = 0;
+                
+                // Gerar múltiplas rodadas de exercícios para cada palavra
+                const maxRounds = Math.ceil(exercisesNeeded / (uniqueWords.length * 4));
+                
+                for (let round = 0; round < maxRounds && exercisesGenerated < exercisesNeeded; round++) {
+                    uniqueWords.forEach((word) => {
+                        if (exercisesGenerated >= exercisesNeeded) return;
+                        
+                        // Tipo 1: Pergunta sobre significado (kanji -> português)
+                        const wrongMeanings = uniqueWords
+                            .filter(w => w.portuguese !== word.portuguese && w.kanji !== word.kanji)
+                            .map(w => w.portuguese)
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 3);
+                        
+                        if (wrongMeanings.length >= 3 && exercisesGenerated < exercisesNeeded) {
+                            const options = [word.portuguese, ...wrongMeanings].sort(() => Math.random() - 0.5);
+                            allExercises.push({
+                                level: level,
+                                question: `「${word.kanji}」の意味は何ですか？`,
+                                options: options,
+                                correct: options.indexOf(word.portuguese)
+                            });
+                            exercisesGenerated++;
+                        }
+                        
+                        // Tipo 2: Pergunta sobre leitura (kanji -> hiragana)
+                        const wrongReadings = uniqueWords
+                            .filter(w => w.reading !== word.reading && w.kanji !== word.kanji)
+                            .map(w => w.reading)
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 3);
+                        
+                        if (wrongReadings.length >= 3 && exercisesGenerated < exercisesNeeded) {
+                            const options = [word.reading, ...wrongReadings].sort(() => Math.random() - 0.5);
+                            allExercises.push({
+                                level: level,
+                                question: `「${word.kanji}」の読み方は？`,
+                                options: options,
+                                correct: options.indexOf(word.reading)
+                            });
+                            exercisesGenerated++;
+                        }
+                        
+                        // Tipo 3: Pergunta sobre romaji (kanji -> romaji)
+                        const wrongRomaji = uniqueWords
+                            .filter(w => w.romaji !== word.romaji && w.kanji !== word.kanji)
+                            .map(w => w.romaji)
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 3);
+                        
+                        if (wrongRomaji.length >= 3 && exercisesGenerated < exercisesNeeded) {
+                            const options = [word.romaji, ...wrongRomaji].sort(() => Math.random() - 0.5);
+                            allExercises.push({
+                                level: level,
+                                question: `「${word.kanji}」のローマ字は？`,
+                                options: options,
+                                correct: options.indexOf(word.romaji)
+                            });
+                            exercisesGenerated++;
+                        }
+                        
+                        // Tipo 4: Pergunta reversa (português -> kanji)
+                        const wrongKanji = uniqueWords
+                            .filter(w => w.kanji !== word.kanji)
+                            .map(w => w.kanji)
+                            .sort(() => Math.random() - 0.5)
+                            .slice(0, 3);
+                        
+                        if (wrongKanji.length >= 3 && exercisesGenerated < exercisesNeeded) {
+                            const options = [word.kanji, ...wrongKanji].sort(() => Math.random() - 0.5);
+                            allExercises.push({
+                                level: level,
+                                question: `「${word.portuguese}」は日本語で何ですか？`,
+                                options: options,
+                                correct: options.indexOf(word.kanji)
+                            });
+                            exercisesGenerated++;
+                        }
+                    });
+                }
+            });
+            
+            return allExercises;
+        }
+
+        // ============================================
+        // DADOS DE VOCABULÁRIO EXPANDIDO
         // ============================================
         const vocabularyData = {
             A1: {
@@ -899,7 +1019,144 @@
                     { kanji: '食べる', reading: 'たべる', romaji: 'taberu', portuguese: 'comer', example: 'ご飯を食べる (comer arroz)' },
                     { kanji: '飲む', reading: 'のむ', romaji: 'nomu', portuguese: 'beber', example: '水を飲む (beber água)' },
                     { kanji: '寝る', reading: 'ねる', romaji: 'neru', portuguese: 'dormir', example: '早く寝る (dormir cedo)' },
-                    { kanji: '起きる', reading: 'おきる', romaji: 'okiru', portuguese: 'acordar', example: '朝早く起きる (acordar cedo)' }
+                    { kanji: '起きる', reading: 'おきる', romaji: 'okiru', portuguese: 'acordar', example: '朝早く起きる (acordar cedo)' },
+                    { kanji: '帰る', reading: 'かえる', romaji: 'kaeru', portuguese: 'voltar', example: '家に帰る (voltar para casa)' },
+                    { kanji: '出る', reading: 'でる', romaji: 'deru', portuguese: 'sair', example: '家を出る (sair de casa)' },
+                    { kanji: '入る', reading: 'はいる', romaji: 'hairu', portuguese: 'entrar', example: '部屋に入る (entrar no quarto)' },
+                    { kanji: '立つ', reading: 'たつ', romaji: 'tatsu', portuguese: 'ficar em pé', example: '立ってください (por favor fique em pé)' },
+                    { kanji: '座る', reading: 'すわる', romaji: 'suwaru', portuguese: 'sentar', example: '椅子に座る (sentar na cadeira)' },
+                    { kanji: '歩く', reading: 'あるく', romaji: 'aruku', portuguese: 'andar', example: '公園を歩く (andar no parque)' },
+                    { kanji: '走る', reading: 'はしる', romaji: 'hashiru', portuguese: 'correr', example: '毎朝走る (correr toda manhã)' },
+                    { kanji: '止まる', reading: 'とまる', romaji: 'tomaru', portuguese: 'parar', example: '信号で止まる (parar no sinal)' },
+                    { kanji: '開ける', reading: 'あける', romaji: 'akeru', portuguese: 'abrir', example: '窓を開ける (abrir a janela)' },
+                    { kanji: '閉める', reading: 'しめる', romaji: 'shimeru', portuguese: 'fechar', example: 'ドアを閉める (fechar a porta)' },
+                    { kanji: '持つ', reading: 'もつ', romaji: 'motsu', portuguese: 'segurar', example: '荷物を持つ (segurar a bagagem)' },
+                    { kanji: '置く', reading: 'おく', romaji: 'oku', portuguese: 'colocar', example: '机の上に置く (colocar na mesa)' },
+                    { kanji: '取る', reading: 'とる', romaji: 'toru', portuguese: 'pegar', example: '写真を取る (tirar foto)' },
+                    { kanji: '上げる', reading: 'あげる', romaji: 'ageru', portuguese: 'levantar', example: '手を上げる (levantar a mão)' },
+                    { kanji: '下げる', reading: 'さげる', romaji: 'sageru', portuguese: 'abaixar', example: '頭を下げる (abaixar a cabeça)' },
+                    { kanji: '作る', reading: 'つくる', romaji: 'tsukuru', portuguese: 'fazer/criar', example: '料理を作る (fazer comida)' },
+                    { kanji: '使う', reading: 'つかう', romaji: 'tsukau', portuguese: 'usar', example: 'パソコンを使う (usar computador)' },
+                    { kanji: '買う', reading: 'かう', romaji: 'kau', portuguese: 'comprar', example: '本を買う (comprar livro)' },
+                    { kanji: '売る', reading: 'うる', romaji: 'uru', portuguese: 'vender', example: '車を売る (vender carro)' },
+                    { kanji: '借りる', reading: 'かりる', romaji: 'kariru', portuguese: 'pedir emprestado', example: '本を借りる (pedir livro emprestado)' },
+                    { kanji: '返す', reading: 'かえす', romaji: 'kaesu', portuguese: 'devolver', example: '本を返す (devolver livro)' },
+                    { kanji: '会う', reading: 'あう', romaji: 'au', portuguese: 'encontrar', example: '友達に会う (encontrar amigo)' },
+                    { kanji: '教える', reading: 'おしえる', romaji: 'oshieru', portuguese: 'ensinar', example: '日本語を教える (ensinar japonês)' },
+                    { kanji: '習う', reading: 'ならう', romaji: 'narau', portuguese: 'aprender', example: 'ピアノを習う (aprender piano)' },
+                    { kanji: '勉強する', reading: 'べんきょうする', romaji: 'benkyou suru', portuguese: 'estudar', example: '毎日勉強する (estudar todo dia)' },
+                    { kanji: '働く', reading: 'はたらく', romaji: 'hataraku', portuguese: 'trabalhar', example: '会社で働く (trabalhar na empresa)' },
+                    { kanji: '休む', reading: 'やすむ', romaji: 'yasumu', portuguese: 'descansar', example: '日曜日に休む (descansar no domingo)' },
+                    { kanji: '遊ぶ', reading: 'あそぶ', romaji: 'asobu', portuguese: 'brincar', example: '公園で遊ぶ (brincar no parque)' },
+                    { kanji: '歌う', reading: 'うたう', romaji: 'utau', portuguese: 'cantar', example: '歌を歌う (cantar música)' },
+                    { kanji: '踊る', reading: 'おどる', romaji: 'odoru', portuguese: 'dançar', example: '音楽に合わせて踊る (dançar com música)' },
+                    { kanji: '聞く', reading: 'きく', romaji: 'kiku', portuguese: 'ouvir', example: '音楽を聞く (ouvir música)' },
+                    { kanji: '話す', reading: 'はなす', romaji: 'hanasu', portuguese: 'falar', example: '日本語を話す (falar japonês)' },
+                    { kanji: '読む', reading: 'よむ', romaji: 'yomu', portuguese: 'ler', example: '本を読む (ler livro)' },
+                    { kanji: '書く', reading: 'かく', romaji: 'kaku', portuguese: 'escrever', example: '手紙を書く (escrever carta)' },
+                    { kanji: '描く', reading: 'かく', romaji: 'kaku', portuguese: 'desenhar', example: '絵を描く (desenhar)' },
+                    { kanji: '洗う', reading: 'あらう', romaji: 'arau', portuguese: 'lavar', example: '手を洗う (lavar as mãos)' },
+                    { kanji: '掃除する', reading: 'そうじする', romaji: 'souji suru', portuguese: 'limpar', example: '部屋を掃除する (limpar o quarto)' },
+                    { kanji: '片付ける', reading: 'かたづける', romaji: 'katadzukeru', portuguese: 'organizar', example: '机を片付ける (organizar a mesa)' },
+                    { kanji: '着る', reading: 'きる', romaji: 'kiru', portuguese: 'vestir', example: '服を着る (vestir roupa)' },
+                    { kanji: '脱ぐ', reading: 'ぬぐ', romaji: 'nugu', portuguese: 'tirar', example: '靴を脱ぐ (tirar sapatos)' },
+                    { kanji: '履く', reading: 'はく', romaji: 'haku', portuguese: 'calçar', example: '靴を履く (calçar sapatos)' },
+                    { kanji: 'かける', reading: 'かける', romaji: 'kakeru', portuguese: 'ligar', example: '電話をかける (ligar telefone)' },
+                    { kanji: '待つ', reading: 'まつ', romaji: 'matsu', portuguese: 'esperar', example: 'バスを待つ (esperar ônibus)' },
+                    { kanji: '始める', reading: 'はじめる', romaji: 'hajimeru', portuguese: 'começar', example: '勉強を始める (começar a estudar)' },
+                    { kanji: '終わる', reading: 'おわる', romaji: 'owaru', portuguese: 'terminar', example: '仕事が終わる (trabalho termina)' },
+                    { kanji: '続ける', reading: 'つづける', romaji: 'tsuzukeru', portuguese: 'continuar', example: '勉強を続ける (continuar estudando)' },
+                    { kanji: '止める', reading: 'とめる', romaji: 'tomeru', portuguese: 'parar', example: '車を止める (parar o carro)' },
+                    { kanji: '変える', reading: 'かえる', romaji: 'kaeru', portuguese: 'mudar', example: '計画を変える (mudar plano)' },
+                    { kanji: '決める', reading: 'きめる', romaji: 'kimeru', portuguese: 'decidir', example: '時間を決める (decidir hora)' },
+                    { kanji: '選ぶ', reading: 'えらぶ', romaji: 'erabu', portuguese: 'escolher', example: '本を選ぶ (escolher livro)' },
+                    { kanji: '考える', reading: 'かんがえる', romaji: 'kangaeru', portuguese: 'pensar', example: '問題を考える (pensar no problema)' },
+                    { kanji: '知る', reading: 'しる', romaji: 'shiru', portuguese: 'saber', example: '答えを知る (saber resposta)' },
+                    { kanji: '分かる', reading: 'わかる', romaji: 'wakaru', portuguese: 'entender', example: '日本語が分かる (entender japonês)' },
+                    { kanji: '覚える', reading: 'おぼえる', romaji: 'oboeru', portuguese: 'lembrar', example: '単語を覚える (lembrar palavra)' },
+                    { kanji: '忘れる', reading: 'わすれる', romaji: 'wasureru', portuguese: 'esquecer', example: '名前を忘れる (esquecer nome)' },
+                    { kanji: '思い出す', reading: 'おもいだす', romaji: 'omoidasu', portuguese: 'lembrar-se', example: '昔を思い出す (lembrar do passado)' },
+                    { kanji: '探す', reading: 'さがす', romaji: 'sagasu', portuguese: 'procurar', example: '鍵を探す (procurar chave)' },
+                    { kanji: '見つける', reading: 'みつける', romaji: 'mitsukeru', portuguese: 'encontrar', example: '答えを見つける (encontrar resposta)' },
+                    { kanji: '失くす', reading: 'なくす', romaji: 'nakusu', portuguese: 'perder', example: '財布を失くす (perder carteira)' },
+                    { kanji: '見せる', reading: 'みせる', romaji: 'miseru', portuguese: 'mostrar', example: '写真を見せる (mostrar foto)' },
+                    { kanji: '見つかる', reading: 'みつかる', romaji: 'mitsukaru', portuguese: 'ser encontrado', example: '鍵が見つかる (chave é encontrada)' },
+                    { kanji: '渡す', reading: 'わたす', romaji: 'watasu', portuguese: 'passar', example: '手紙を渡す (passar carta)' },
+                    { kanji: '渡る', reading: 'わたる', romaji: 'wataru', portuguese: 'atravessar', example: '橋を渡る (atravessar ponte)' },
+                    { kanji: '通る', reading: 'とおる', romaji: 'tooru', portuguese: 'passar por', example: '道を通る (passar pela rua)' },
+                    { kanji: '曲がる', reading: 'まがる', romaji: 'magaru', portuguese: 'virar', example: '右に曲がる (virar à direita)' },
+                    { kanji: '回る', reading: 'まわる', romaji: 'mawaru', portuguese: 'girar', example: '時計が回る (relógio gira)' },
+                    { kanji: '回す', reading: 'まわす', romaji: 'mawasu', portuguese: 'girar (transitivo)', example: 'ドアを回す (girar porta)' },
+                    { kanji: '動く', reading: 'うごく', romaji: 'ugoku', portuguese: 'mover-se', example: '車が動く (carro se move)' },
+                    { kanji: '動かす', reading: 'うごかす', romaji: 'ugokasu', portuguese: 'mover', example: '机を動かす (mover mesa)' },
+                    { kanji: '飛ぶ', reading: 'とぶ', romaji: 'tobu', portuguese: 'voar', example: '鳥が飛ぶ (pássaro voa)' },
+                    { kanji: '泳ぐ', reading: 'およぐ', romaji: 'oyogu', portuguese: 'nadar', example: 'プールで泳ぐ (nadar na piscina)' },
+                    { kanji: '登る', reading: 'のぼる', romaji: 'noboru', portuguese: 'subir', example: '山に登る (subir montanha)' },
+                    { kanji: '降りる', reading: 'おりる', romaji: 'oriru', portuguese: 'descer', example: '階段を降りる (descer escada)' },
+                    { kanji: '上がる', reading: 'あがる', romaji: 'agaru', portuguese: 'subir', example: '値段が上がる (preço sobe)' },
+                    { kanji: '下がる', reading: 'さがる', romaji: 'sagaru', portuguese: 'descer', example: '温度が下がる (temperatura desce)' },
+                    { kanji: '乗る', reading: 'のる', romaji: 'noru', portuguese: 'subir em', example: '電車に乗る (subir no trem)' },
+                    { kanji: '乗せる', reading: 'のせる', romaji: 'noseru', portuguese: 'colocar em', example: '荷物を乗せる (colocar bagagem)' },
+                    { kanji: '降ろす', reading: 'おろす', romaji: 'orosu', portuguese: 'tirar de', example: '荷物を降ろす (tirar bagagem)' },
+                    { kanji: '運ぶ', reading: 'はこぶ', romaji: 'hakobu', portuguese: 'carregar', example: '荷物を運ぶ (carregar bagagem)' },
+                    { kanji: '送る', reading: 'おくる', romaji: 'okuru', portuguese: 'enviar', example: '手紙を送る (enviar carta)' },
+                    { kanji: '届ける', reading: 'とどける', romaji: 'todokeru', portuguese: 'entregar', example: '荷物を届ける (entregar bagagem)' },
+                    { kanji: '届く', reading: 'とどく', romaji: 'todoku', portuguese: 'chegar', example: '手紙が届く (carta chega)' },
+                    { kanji: '受ける', reading: 'うける', romaji: 'ukeru', portuguese: 'receber', example: '試験を受ける (fazer exame)' },
+                    { kanji: '触る', reading: 'さわる', romaji: 'sawaru', portuguese: 'tocar', example: '手で触る (tocar com a mão)' },
+                    { kanji: '押す', reading: 'おす', romaji: 'osu', portuguese: 'empurrar', example: 'ボタンを押す (empurrar botão)' },
+                    { kanji: '引く', reading: 'ひく', romaji: 'hiku', portuguese: 'puxar', example: 'ドアを引く (puxar porta)' },
+                    { kanji: '切る', reading: 'きる', romaji: 'kiru', portuguese: 'cortar', example: '紙を切る (cortar papel)' },
+                    { kanji: '貼る', reading: 'はる', romaji: 'haru', portuguese: 'colar', example: '切手を貼る (colar selo)' },
+                    { kanji: '結ぶ', reading: 'むすぶ', romaji: 'musubu', portuguese: 'amarrar', example: '紐を結ぶ (amarrar corda)' },
+                    { kanji: '解く', reading: 'とく', romaji: 'toku', portuguese: 'desamarrar', example: '問題を解く (resolver problema)' },
+                    { kanji: '壊す', reading: 'こわす', romaji: 'kowasu', portuguese: 'quebrar', example: '壊す (quebrar)' },
+                    { kanji: '直す', reading: 'なおす', romaji: 'naosu', portuguese: 'consertar', example: '時計を直す (consertar relógio)' },
+                    { kanji: '壊れる', reading: 'こわれる', romaji: 'kowareru', portuguese: 'quebrar-se', example: '壊れる (quebrar-se)' },
+                    { kanji: '直る', reading: 'なおる', romaji: 'naoru', portuguese: 'consertar-se', example: '直る (consertar-se)' },
+                    { kanji: '割る', reading: 'わる', romaji: 'waru', portuguese: 'quebrar', example: '卵を割る (quebrar ovo)' },
+                    { kanji: '割れる', reading: 'われる', romaji: 'wareru', portuguese: 'quebrar-se', example: '割れる (quebrar-se)' },
+                    { kanji: '破る', reading: 'やぶる', romaji: 'yaburu', portuguese: 'rasgar', example: '約束を破る (quebrar promessa)' },
+                    { kanji: '破れる', reading: 'やぶれる', romaji: 'yabureru', portuguese: 'rasgar-se', example: '破れる (rasgar-se)' },
+                    { kanji: '折る', reading: 'おる', romaji: 'oru', portuguese: 'dobrar', example: '紙を折る (dobrar papel)' },
+                    { kanji: '折れる', reading: 'おれる', romaji: 'oreru', portuguese: 'quebrar-se', example: '枝が折れる (galho quebra)' },
+                    { kanji: '曲げる', reading: 'まげる', romaji: 'mageru', portuguese: 'dobrar', example: '膝を曲げる (dobrar joelho)' },
+                    { kanji: '伸ばす', reading: 'のばす', romaji: 'nobasu', portuguese: 'esticar', example: '手を伸ばす (esticar a mão)' },
+                    { kanji: '伸びる', reading: 'のびる', romaji: 'nobiru', portuguese: 'esticar-se', example: '髪が伸びる (cabelo cresce)' },
+                    { kanji: '縮む', reading: 'ちぢむ', romaji: 'chijimu', portuguese: 'encolher', example: '縮む (encolher)' },
+                    { kanji: '縮める', reading: 'ちぢめる', romaji: 'chijimeru', portuguese: 'encolher', example: '距離を縮める (encurtar distância)' },
+                    { kanji: '広げる', reading: 'ひろげる', romaji: 'hirogeru', portuguese: 'expandir', example: '地図を広げる (abrir mapa)' },
+                    { kanji: '広がる', reading: 'ひろがる', romaji: 'hirogaru', portuguese: 'expandir-se', example: '広がる (expandir-se)' },
+                    { kanji: '狭める', reading: 'せばめる', romaji: 'sebameru', portuguese: 'estreitar', example: '狭める (estreitar)' },
+                    { kanji: '狭まる', reading: 'せばまる', romaji: 'sebamaru', portuguese: 'estreitar-se', example: '狭まる (estreitar-se)' },
+                    { kanji: '集める', reading: 'あつめる', romaji: 'atsumeru', portuguese: 'coletar', example: '切手を集める (coletar selos)' },
+                    { kanji: '集まる', reading: 'あつまる', romaji: 'atsumaru', portuguese: 'juntar-se', example: '人が集まる (pessoas se reúnem)' },
+                    { kanji: '散らす', reading: 'ちらす', romaji: 'chirasu', portuguese: 'espalhar', example: '散らす (espalhar)' },
+                    { kanji: '散る', reading: 'ちる', romaji: 'chiru', portuguese: 'cair', example: '花が散る (flores caem)' },
+                    { kanji: '並べる', reading: 'ならべる', romaji: 'naraberu', portuguese: 'alinhar', example: '本を並べる (alinhar livros)' },
+                    { kanji: '並ぶ', reading: 'ならぶ', romaji: 'narabu', portuguese: 'alinhar-se', example: '並ぶ (filar)' },
+                    { kanji: '揃える', reading: 'そろえる', romaji: 'soroeru', portuguese: 'alinhar', example: '揃える (alinhar)' },
+                    { kanji: '揃う', reading: 'そろう', romaji: 'sorou', portuguese: 'estar completo', example: '揃う (estar completo)' },
+                    { kanji: '混ぜる', reading: 'まぜる', romaji: 'mazeru', portuguese: 'misturar', example: '混ぜる (misturar)' },
+                    { kanji: '混ざる', reading: 'まざる', romaji: 'mazaru', portuguese: 'misturar-se', example: '混ざる (misturar-se)' },
+                    { kanji: '分ける', reading: 'わける', romaji: 'wakeru', portuguese: 'dividir', example: '分ける (dividir)' },
+                    { kanji: '分かれる', reading: 'わかれる', romaji: 'wakareru', portuguese: 'dividir-se', example: '道が分かれる (estrada se divide)' },
+                    { kanji: '合わせる', reading: 'あわせる', romaji: 'awaseru', portuguese: 'combinar', example: '時計を合わせる (acertar relógio)' },
+                    { kanji: '外す', reading: 'はずす', romaji: 'hazusu', portuguese: 'remover', example: '眼鏡を外す (remover óculos)' },
+                    { kanji: '外れる', reading: 'はずれる', romaji: 'hazureru', portuguese: 'sair', example: 'ボタンが外れる (botão sai)' },
+                    { kanji: '付ける', reading: 'つける', romaji: 'tsukeru', portuguese: 'colocar', example: 'ライトを付ける (acender luz)' },
+                    { kanji: '付く', reading: 'つく', romaji: 'tsuku', portuguese: 'grudar', example: '付く (grudar)' },
+                    { kanji: '離す', reading: 'はなす', romaji: 'hanasu', portuguese: 'soltar', example: '手を離す (soltar a mão)' },
+                    { kanji: '離れる', reading: 'はなれる', romaji: 'hanareru', portuguese: 'separar-se', example: '離れる (afastar-se)' },
+                    { kanji: '近づける', reading: 'ちかづける', romaji: 'chikadzukeru', portuguese: 'aproximar', example: '近づける (aproximar)' },
+                    { kanji: '近づく', reading: 'ちかづく', romaji: 'chikadzuku', portuguese: 'aproximar-se', example: '近づく (aproximar-se)' },
+                    { kanji: '遠ざける', reading: 'とおざける', romaji: 'toozakeru', portuguese: 'afastar', example: '遠ざける (afastar)' },
+                    { kanji: '遠ざかる', reading: 'とおざかる', romaji: 'toozakaru', portuguese: 'afastar-se', example: '遠ざかる (afastar-se)' },
+                    { kanji: '寄せる', reading: 'よせる', romaji: 'yoseru', portuguese: 'aproximar', example: '寄せる (aproximar)' },
+                    { kanji: '寄る', reading: 'よる', romaji: 'yoru', portuguese: 'passar em', example: '店に寄る (passar na loja)' },
+                    { kanji: '戻す', reading: 'もどす', romaji: 'modosu', portuguese: 'devolver', example: '元に戻す (devolver ao lugar)' },
+                    { kanji: '戻る', reading: 'もどる', romaji: 'modoru', portuguese: 'voltar', example: '家に戻る (voltar para casa)' },
+                    { kanji: '返る', reading: 'かえる', romaji: 'kaeru', portuguese: 'voltar', example: '返る (voltar)' }
                 ],
                 adjectives: [
                     { kanji: '大きい', reading: 'おおきい', romaji: 'ookii', portuguese: 'grande', example: '大きい家 (casa grande)' },
@@ -907,15 +1164,37 @@
                     { kanji: '新しい', reading: 'あたらしい', romaji: 'atarashii', portuguese: 'novo', example: '新しい車 (carro novo)' },
                     { kanji: '古い', reading: 'ふるい', romaji: 'furui', portuguese: 'velho', example: '古い本 (livro velho)' },
                     { kanji: '高い', reading: 'たかい', romaji: 'takai', portuguese: 'alto/caro', example: '高い山 (montanha alta)' },
-                    { kanji: '安い', reading: 'やすい', romaji: 'yasui', portuguese: 'barato', example: '安い値段 (preço barato)' }
+                    { kanji: '安い', reading: 'やすい', romaji: 'yasui', portuguese: 'barato', example: '安い値段 (preço barato)' },
+                    { kanji: '暑い', reading: 'あつい', romaji: 'atsui', portuguese: 'quente', example: '暑い夏 (verão quente)' },
+                    { kanji: '寒い', reading: 'さむい', romaji: 'samui', portuguese: 'frio', example: '寒い冬 (inverno frio)' },
+                    { kanji: '忙しい', reading: 'いそがしい', romaji: 'isogashii', portuguese: 'ocupado', example: '忙しい日 (dia ocupado)' },
+                    { kanji: '暇', reading: 'ひま', romaji: 'hima', portuguese: 'livre', example: '暇な時 (quando livre)' },
+                    { kanji: '難しい', reading: 'むずかしい', romaji: 'muzukashii', portuguese: 'difícil', example: '難しい問題 (problema difícil)' },
+                    { kanji: '簡単', reading: 'かんたん', romaji: 'kantan', portuguese: 'fácil', example: '簡単な質問 (pergunta fácil)' },
+                    { kanji: '良い', reading: 'よい', romaji: 'yoi', portuguese: 'bom', example: '良い天気 (bom tempo)' },
+                    { kanji: '悪い', reading: 'わるい', romaji: 'warui', portuguese: 'ruim', example: '悪い人 (pessoa ruim)' },
+                    { kanji: '美しい', reading: 'うつくしい', romaji: 'utsukushii', portuguese: 'bonito', example: '美しい花 (flor bonita)' },
+                    { kanji: '汚い', reading: 'きたない', romaji: 'kitanai', portuguese: 'sujo', example: '汚い部屋 (quarto sujo)' },
+                    { kanji: '明るい', reading: 'あかるい', romaji: 'akarui', portuguese: 'claro', example: '明るい部屋 (quarto claro)' },
+                    { kanji: '暗い', reading: 'くらい', romaji: 'kurai', portuguese: 'escuro', example: '暗い夜 (noite escura)' },
+                    { kanji: '速い', reading: 'はやい', romaji: 'hayai', portuguese: 'rápido', example: '速い車 (carro rápido)' },
+                    { kanji: '遅い', reading: 'おそい', romaji: 'osoi', portuguese: 'lento', example: '遅いバス (ônibus lento)' }
                 ],
                 daily: [
                     { kanji: '朝', reading: 'あさ', romaji: 'asa', portuguese: 'manhã', example: '朝ごはん (café da manhã)' },
                     { kanji: '昼', reading: 'ひる', romaji: 'hiru', portuguese: 'meio-dia', example: '昼ごはん (almoço)' },
                     { kanji: '夜', reading: 'よる', romaji: 'yoru', portuguese: 'noite', example: '夜ごはん (jantar)' },
-                    { kanji: '今日', reading: 'きょう', romaji: 'kyou', portuguese: 'hoje', example: '今日は月曜日 (hoje é segunda-feira)' },
-                    { kanji: '明日', reading: 'あした', romaji: 'ashita', portuguese: 'amanhã', example: '明日会いましょう (vejo você amanhã)' },
-                    { kanji: '昨日', reading: 'きのう', romaji: 'kinou', portuguese: 'ontem', example: '昨日雨が降った (choveu ontem)' }
+                    { kanji: '今日', reading: 'きょう', romaji: 'kyou', portuguese: 'hoje', example: '今日は月曜日 (hoje é segunda)' },
+                    { kanji: '明日', reading: 'あした', romaji: 'ashita', portuguese: 'amanhã', example: '明日会いましょう (até amanhã)' },
+                    { kanji: '昨日', reading: 'きのう', romaji: 'kinou', portuguese: 'ontem', example: '昨日雨が降った (choveu ontem)' },
+                    { kanji: '週', reading: 'しゅう', romaji: 'shuu', portuguese: 'semana', example: '来週 (próxima semana)' },
+                    { kanji: '月', reading: 'つき', romaji: 'tsuki', portuguese: 'mês', example: '今月 (este mês)' },
+                    { kanji: '年', reading: 'とし', romaji: 'toshi', portuguese: 'ano', example: '来年 (próximo ano)' },
+                    { kanji: '時', reading: 'とき', romaji: 'toki', portuguese: 'hora', example: '何時 (que horas)' },
+                    { kanji: '分', reading: 'ふん', romaji: 'fun', portuguese: 'minuto', example: '五分 (cinco minutos)' },
+                    { kanji: '今', reading: 'いま', romaji: 'ima', portuguese: 'agora', example: '今何時 (que horas agora)' },
+                    { kanji: '前', reading: 'まえ', romaji: 'mae', portuguese: 'antes', example: '食事の前 (antes da refeição)' },
+                    { kanji: '後', reading: 'あと', romaji: 'ato', portuguese: 'depois', example: '授業の後 (depois da aula)' }
                 ],
                 work: [
                     { kanji: '会社', reading: 'かいしゃ', romaji: 'kaisha', portuguese: 'empresa', example: '会社に行く (ir à empresa)' },
@@ -973,55 +1252,58 @@
                 emotions: []
             },
             B2: {
-                verbs: [],
-                adjectives: [],
-                daily: [],
-                work: [],
-                emotions: []
+                verbs: [
+                    { kanji: '議論する', reading: 'ぎろんする', romaji: 'giron suru', portuguese: 'debater', example: '問題を議論する (debater problema)' },
+                    { kanji: '主張する', reading: 'しゅちょうする', romaji: 'shuchou suru', portuguese: 'afirmar', example: '主張する (afirmar)' },
+                    { kanji: '批判する', reading: 'ひはんする', romaji: 'hihan suru', portuguese: 'criticar', example: '批判する (criticar)' },
+                    { kanji: '評価する', reading: 'ひょうかする', romaji: 'hyouka suru', portuguese: 'avaliar', example: '評価する (avaliar)' },
+                    { kanji: '分析する', reading: 'ぶんせきする', romaji: 'bunseki suru', portuguese: 'analisar', example: '分析する (analisar)' },
+                    { kanji: '比較する', reading: 'ひかくする', romaji: 'hikaku suru', portuguese: 'comparar', example: '比較する (comparar)' },
+                    { kanji: '説明する', reading: 'せつめいする', romaji: 'setsumei suru', portuguese: 'explicar', example: '説明する (explicar)' },
+                    { kanji: '理解する', reading: 'りかいする', romaji: 'rikai suru', portuguese: 'compreender', example: '理解する (compreender)' },
+                    { kanji: '実現する', reading: 'じつげんする', romaji: 'jitsugen suru', portuguese: 'realizar', example: '夢を実現する (realizar sonho)' },
+                    { kanji: '改善する', reading: 'かいぜんする', romaji: 'kaizen suru', portuguese: 'melhorar', example: '改善する (melhorar)' }
+                ],
+                adjectives: [
+                    { kanji: '適切', reading: 'てきせつ', romaji: 'tekisetsu', portuguese: 'apropriado', example: '適切な方法 (método apropriado)' },
+                    { kanji: '複雑', reading: 'ふくざつ', romaji: 'fukuzatsu', portuguese: 'complexo', example: '複雑な問題 (problema complexo)' },
+                    { kanji: '明確', reading: 'めいかく', romaji: 'meikaku', portuguese: 'claro', example: '明確な説明 (explicação clara)' },
+                    { kanji: '重要', reading: 'じゅうよう', romaji: 'juuyou', portuguese: 'importante', example: '重要な会議 (reunião importante)' },
+                    { kanji: '必然', reading: 'ひつぜん', romaji: 'hitsuzen', portuguese: 'inevitável', example: '必然の結果 (resultado inevitável)' }
+                ],
+                daily: [
+                    { kanji: '習慣', reading: 'しゅうかん', romaji: 'shuukan', portuguese: 'costume', example: '習慣を変える (mudar costume)' },
+                    { kanji: '経験', reading: 'けいけん', romaji: 'keiken', portuguese: 'experiência', example: '経験を積む (acumular experiência)' }
+                ],
+                work: [
+                    { kanji: '経営', reading: 'けいえい', romaji: 'keiei', portuguese: 'gestão', example: '経営者 (gestor)' },
+                    { kanji: '契約', reading: 'けいやく', romaji: 'keiyaku', portuguese: 'contrato', example: '契約を結ぶ (firmar contrato)' }
+                ],
+                emotions: [
+                    { kanji: '満足', reading: 'まんぞく', romaji: 'manzoku', portuguese: 'satisfação', example: '満足する (ficar satisfeito)' },
+                    { kanji: '不安', reading: 'ふあん', romaji: 'fuan', portuguese: 'ansiedade', example: '不安を感じる (sentir ansiedade)' }
+                ]
             }
         };
 
         // ============================================
-        // EXERCÍCIOS
+        // EXERCÍCIOS - GERADOS AUTOMATICAMENTE
         // ============================================
-        const exercises = [
-            {
-                level: 'A1',
-                question: '「行く」の意味は何ですか？',
-                options: ['ir', 'vir', 'fazer', 'ver'],
-                correct: 0
-            },
-            {
-                level: 'A1',
-                question: '「食べる」の読み方は？',
-                options: ['のむ', 'たべる', 'みる', 'いく'],
-                correct: 1
-            },
-            {
-                level: 'A1',
-                question: '「大きい」の反対語は？',
-                options: ['新しい', '小さい', '古い', '高い'],
-                correct: 1
-            },
-            {
-                level: 'A2',
-                question: '「話す」の意味は？',
-                options: ['ouvir', 'falar', 'ler', 'escrever'],
-                correct: 1
-            },
-            {
-                level: 'A2',
-                question: '「暑い」は何を表しますか？',
-                options: ['temperatura quente', 'temperatura fria', 'sentimento', 'tamanho'],
-                correct: 0
-            },
-            {
-                level: 'B1',
-                question: '「考える」の読み方は？',
-                options: ['きめる', 'かんがえる', 'はじめる', 'おわる'],
-                correct: 1
-            }
-        ];
+        // Os exercícios são gerados automaticamente do vocabulário
+        // Isso garante pelo menos 500 exercícios por nível
+        let exercises = [];
+        
+        // Função para gerar todos os exercícios do vocabulário
+        function generateAllExercises() {
+            exercises = generateExercisesFromVocabulary();
+            console.log(`Total de exercícios gerados: ${exercises.length}`);
+            console.log(`Exercícios por nível:`, {
+                A1: exercises.filter(e => e.level === 'A1').length,
+                A2: exercises.filter(e => e.level === 'A2').length,
+                B1: exercises.filter(e => e.level === 'B1').length,
+                B2: exercises.filter(e => e.level === 'B2').length
+            });
+        }
 
         // ============================================
         // ESTADO DA APLICAÇÃO
@@ -1052,9 +1334,10 @@
             initializeTheme();
             initializeLevelSelector();
             initializeCategorySelector();
+            generateAllExercises(); // Gerar exercícios do vocabulário primeiro
             initializeVocabulary();
             initializeFlashcards();
-            initializeExercises();
+            initializeExercises(); // Inicializar UI dos exercícios
             initializeProgress();
             updateProgressDisplay();
         });

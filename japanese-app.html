@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aplicativo de estudo de japonês - Aprendizado acelerado do básico ao avançado">
+    <title>Japanese App - Aprenda Japonês</title>
+    <style>
+        /* ============================================
+           VARIÁVEIS CSS E TEMA
+           ============================================ */
+        :root {
+            /* Cores principais - Tema Claro */
+            --primary-color: #dc2626;
+            --primary-hover: #b91c1c;
+            --secondary-color: #64748b;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            
+            /* Cores de fundo */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            
+            /* Cores de texto */
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            
+            /* Bordas e sombras */
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            
+            /* Espaçamento */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            /* Transições */
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            /* Cores principais - Tema Escuro */
+            --primary-color: #ef4444;
+            --primary-hover: #dc2626;
+            --secondary-color: #94a3b8;
+            --accent-color: #fbbf24;
+            --success-color: #34d399;
+            --error-color: #f87171;
+            --warning-color: #fbbf24;
+            
+            /* Cores de fundo */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-card: #1e293b;
+            
+            /* Cores de texto */
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            
+            /* Bordas e sombras */
+            --border-color: #334155;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ============================================
+           RESET E BASE
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        /* ============================================
+           NAVEGAÇÃO
+           ============================================ */
+        .navbar {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: var(--spacing-md);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .nav-brand h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .theme-btn {
+            background: var(--bg-tertiary);
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-btn:hover {
+            background-color: var(--border-color);
+        }
+
+        /* ============================================
+           CONTAINER PRINCIPAL
+           ============================================ */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           DASHBOARD
+           ============================================ */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .dashboard-header h2 {
+            font-size: 2rem;
+        }
+
+        .streak-info {
+            font-size: 1.2rem;
+        }
+
+        .streak-count {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            margin-bottom: var(--spacing-md);
+            color: var(--text-primary);
+            font-size: 1.3rem;
+        }
+
+        /* Progresso Circular */
+        .progress-card {
+            text-align: center;
+        }
+
+        .progress-circle {
+            position: relative;
+            display: inline-block;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            fill: none;
+            stroke: var(--bg-tertiary);
+            stroke-width: 8;
+        }
+
+        .progress-ring-circle.progress {
+            stroke: var(--primary-color);
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 339.292;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .level-badges {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .level-badge {
+            padding: var(--spacing-xs) var(--spacing-md);
+            background-color: var(--bg-tertiary);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .level-badge.completed {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .level-badge.in-progress {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Estatísticas */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Botões de Ação */
+        .action-btn {
+            width: 100%;
+            padding: var(--spacing-md);
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .action-btn.danger {
+            background-color: var(--error-color);
+        }
+
+        .action-btn.danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* ============================================
+           VOCABULÁRIO
+           ============================================ */
+        .level-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .level-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .level-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-selector {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .category-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .category-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .vocab-card {
+            background-color: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .vocab-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            border-color: var(--primary-color);
+        }
+
+        .vocab-card.learned {
+            border-color: var(--success-color);
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .vocab-kanji {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+
+        .vocab-reading {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+            text-align: center;
+        }
+
+        .vocab-portuguese {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: var(--spacing-sm);
+            text-align: center;
+        }
+
+        .vocab-example {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            margin-top: var(--spacing-sm);
+            padding-top: var(--spacing-sm);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* ============================================
+           FLASHCARDS
+           ============================================ */
+        .flashcard-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            height: 400px;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            padding: var(--spacing-xl);
+            background-color: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-text {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .flashcard-reading {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .flashcard-portuguese {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .flashcard-example {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            margin-top: var(--spacing-md);
+        }
+
+        .flashcard-controls {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-lg);
+        }
+
+        .flashcard-info {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* ============================================
+           EXERCÍCIOS
+           ============================================ */
+        .exercise-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .exercise-question {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .exercise-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .option-btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            background-color: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1rem;
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary-color);
+            background-color: var(--bg-tertiary);
+        }
+
+        .option-btn.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .option-btn.incorrect {
+            background-color: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .exercise-feedback {
+            padding: var(--spacing-md);
+            border-radius: 8px;
+            margin-top: var(--spacing-md);
+            display: none;
+            text-align: center;
+        }
+
+        .exercise-feedback.show {
+            display: block;
+        }
+
+        .exercise-feedback.correct {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .exercise-feedback.incorrect {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+        }
+
+        /* ============================================
+           PROGRESSO
+           ============================================ */
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .progress-stat {
+            text-align: center;
+            padding: var(--spacing-md);
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .progress-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .progress-stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .category-progress {
+            margin-top: var(--spacing-lg);
+        }
+
+        .category-progress-item {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .category-progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* ============================================
+           RESPONSIVIDADE
+           ============================================ */
+        @media (max-width: 768px) {
+            .nav-menu {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .nav-btn {
+                width: 100%;
+                text-align: left;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .vocabulary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-container {
+                padding: var(--spacing-md);
+            }
+
+            .flashcard-text {
+                font-size: 2rem;
+            }
+
+            .vocab-kanji {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navegação Principal -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>🇯🇵 Japanese App</h1>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-btn active" data-page="vocabulary">Vocabulário</button>
+                <button class="nav-btn" data-page="flashcards">Flashcards</button>
+                <button class="nav-btn" data-page="exercises">Exercícios</button>
+                <button class="nav-btn" data-page="progress">Progresso</button>
+            </div>
+            <div class="nav-actions">
+                <button id="theme-toggle" class="theme-btn" title="Alternar tema">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Container Principal -->
+    <main class="main-container">
+        <!-- Vocabulário -->
+        <section id="vocabulary" class="page active">
+            <div class="page-header">
+                <h2>Vocabulário</h2>
+            </div>
+            
+            <div class="level-selector">
+                <button class="level-btn active" data-level="A1">A1 - Iniciante</button>
+                <button class="level-btn" data-level="A2">A2 - Básico</button>
+                <button class="level-btn" data-level="B1">B1 - Intermediário</button>
+                <button class="level-btn" data-level="B2">B2 - Intermediário Superior</button>
+            </div>
+
+            <div class="category-selector">
+                <button class="category-btn active" data-category="all">Todas</button>
+                <button class="category-btn" data-category="verbs">Verbos</button>
+                <button class="category-btn" data-category="adjectives">Adjetivos</button>
+                <button class="category-btn" data-category="daily">Vida Diária</button>
+                <button class="category-btn" data-category="work">Trabalho</button>
+                <button class="category-btn" data-category="emotions">Emoções</button>
+            </div>
+
+            <div id="vocabularyGrid" class="vocabulary-grid"></div>
+        </section>
+
+        <!-- Flashcards -->
+        <section id="flashcards" class="page">
+            <div class="page-header">
+                <h2>Flashcards</h2>
+            </div>
+            
+            <div class="flashcard-container">
+                <div class="flashcard-info">
+                    Card <span id="currentCard">1</span> de <span id="totalCards">0</span>
+                </div>
+                
+                <div id="flashcard" class="flashcard">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <div id="flashcardText" class="flashcard-text"></div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div id="flashcardBackText"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-controls">
+                    <button id="flipCard" class="action-btn">Virar Card</button>
+                    <button id="nextCard" class="action-btn">Próximo Card</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Exercícios -->
+        <section id="exercises" class="page">
+            <div class="page-header">
+                <h2>Exercícios</h2>
+            </div>
+            
+            <div class="exercise-container">
+                <div id="exerciseQuestion" class="exercise-question"></div>
+                <div id="exerciseOptions" class="exercise-options"></div>
+                <div id="exerciseFeedback" class="exercise-feedback"></div>
+                <div style="text-align: center; margin-top: var(--spacing-lg);">
+                    <button id="nextExercise" class="action-btn" style="display: none;">Próximo Exercício</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Progresso -->
+        <section id="progress" class="page">
+            <div class="page-header">
+                <h2>Progresso</h2>
+            </div>
+            
+            <div class="progress-stats">
+                <div class="progress-stat">
+                    <div class="progress-stat-value" id="wordsLearned">0</div>
+                    <div class="progress-stat-label">Palavras Aprendidas</div>
+                </div>
+                <div class="progress-stat">
+                    <div class="progress-stat-value" id="exercisesCompleted">0</div>
+                    <div class="progress-stat-label">Exercícios Completos</div>
+                </div>
+                <div class="progress-stat">
+                    <div class="progress-stat-value" id="accuracy">0%</div>
+                    <div class="progress-stat-label">Taxa de Acerto</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Progresso por Categoria</h3>
+                <div id="categoryProgress" class="category-progress"></div>
+            </div>
+
+            <div class="card" style="margin-top: var(--spacing-lg);">
+                <h3>Gerenciar Progresso</h3>
+                <button id="resetProgress" class="action-btn danger">Resetar Todo o Progresso</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ============================================
+        // DADOS DE VOCABULÁRIO
+        // ============================================
+        const vocabularyData = {
+            A1: {
+                verbs: [
+                    { kanji: '行く', reading: 'いく', romaji: 'iku', portuguese: 'ir', example: '学校に行く (ir para a escola)' },
+                    { kanji: '来る', reading: 'くる', romaji: 'kuru', portuguese: 'vir', example: '日本に来る (vir ao Japão)' },
+                    { kanji: 'する', reading: 'する', romaji: 'suru', portuguese: 'fazer', example: '勉強する (estudar)' },
+                    { kanji: '見る', reading: 'みる', romaji: 'miru', portuguese: 'ver', example: '映画を見る (ver filme)' },
+                    { kanji: '食べる', reading: 'たべる', romaji: 'taberu', portuguese: 'comer', example: 'ご飯を食べる (comer arroz)' },
+                    { kanji: '飲む', reading: 'のむ', romaji: 'nomu', portuguese: 'beber', example: '水を飲む (beber água)' },
+                    { kanji: '寝る', reading: 'ねる', romaji: 'neru', portuguese: 'dormir', example: '早く寝る (dormir cedo)' },
+                    { kanji: '起きる', reading: 'おきる', romaji: 'okiru', portuguese: 'acordar', example: '朝早く起きる (acordar cedo)' }
+                ],
+                adjectives: [
+                    { kanji: '大きい', reading: 'おおきい', romaji: 'ookii', portuguese: 'grande', example: '大きい家 (casa grande)' },
+                    { kanji: '小さい', reading: 'ちいさい', romaji: 'chiisai', portuguese: 'pequeno', example: '小さい犬 (cachorro pequeno)' },
+                    { kanji: '新しい', reading: 'あたらしい', romaji: 'atarashii', portuguese: 'novo', example: '新しい車 (carro novo)' },
+                    { kanji: '古い', reading: 'ふるい', romaji: 'furui', portuguese: 'velho', example: '古い本 (livro velho)' },
+                    { kanji: '高い', reading: 'たかい', romaji: 'takai', portuguese: 'alto/caro', example: '高い山 (montanha alta)' },
+                    { kanji: '安い', reading: 'やすい', romaji: 'yasui', portuguese: 'barato', example: '安い値段 (preço barato)' }
+                ],
+                daily: [
+                    { kanji: '朝', reading: 'あさ', romaji: 'asa', portuguese: 'manhã', example: '朝ごはん (café da manhã)' },
+                    { kanji: '昼', reading: 'ひる', romaji: 'hiru', portuguese: 'meio-dia', example: '昼ごはん (almoço)' },
+                    { kanji: '夜', reading: 'よる', romaji: 'yoru', portuguese: 'noite', example: '夜ごはん (jantar)' },
+                    { kanji: '今日', reading: 'きょう', romaji: 'kyou', portuguese: 'hoje', example: '今日は月曜日 (hoje é segunda-feira)' },
+                    { kanji: '明日', reading: 'あした', romaji: 'ashita', portuguese: 'amanhã', example: '明日会いましょう (vejo você amanhã)' },
+                    { kanji: '昨日', reading: 'きのう', romaji: 'kinou', portuguese: 'ontem', example: '昨日雨が降った (choveu ontem)' }
+                ],
+                work: [
+                    { kanji: '会社', reading: 'かいしゃ', romaji: 'kaisha', portuguese: 'empresa', example: '会社に行く (ir à empresa)' },
+                    { kanji: '仕事', reading: 'しごと', romaji: 'shigoto', portuguese: 'trabalho', example: '仕事をする (trabalhar)' },
+                    { kanji: '会議', reading: 'かいぎ', romaji: 'kaigi', portuguese: 'reunião', example: '会議がある (ter reunião)' }
+                ],
+                emotions: [
+                    { kanji: '嬉しい', reading: 'うれしい', romaji: 'ureshii', portuguese: 'feliz', example: '嬉しい気持ち (sentimento feliz)' },
+                    { kanji: '悲しい', reading: 'かなしい', romaji: 'kanashii', portuguese: 'triste', example: '悲しい話 (história triste)' },
+                    { kanji: '楽しい', reading: 'たのしい', romaji: 'tanoshii', portuguese: 'divertido', example: '楽しい時間 (tempo divertido)' }
+                ]
+            },
+            A2: {
+                verbs: [
+                    { kanji: '話す', reading: 'はなす', romaji: 'hanasu', portuguese: 'falar', example: '日本語を話す (falar japonês)' },
+                    { kanji: '聞く', reading: 'きく', romaji: 'kiku', portuguese: 'ouvir', example: '音楽を聞く (ouvir música)' },
+                    { kanji: '読む', reading: 'よむ', romaji: 'yomu', portuguese: 'ler', example: '本を読む (ler livro)' },
+                    { kanji: '書く', reading: 'かく', romaji: 'kaku', portuguese: 'escrever', example: '手紙を書く (escrever carta)' },
+                    { kanji: '買う', reading: 'かう', romaji: 'kau', portuguese: 'comprar', example: '服を買う (comprar roupa)' },
+                    { kanji: '売る', reading: 'うる', romaji: 'uru', portuguese: 'vender', example: '車を売る (vender carro)' }
+                ],
+                adjectives: [
+                    { kanji: '暑い', reading: 'あつい', romaji: 'atsui', portuguese: 'quente (tempo)', example: '暑い夏 (verão quente)' },
+                    { kanji: '寒い', reading: 'さむい', romaji: 'samui', portuguese: 'frio', example: '寒い冬 (inverno frio)' },
+                    { kanji: '忙しい', reading: 'いそがしい', romaji: 'isogashii', portuguese: 'ocupado', example: '忙しい日 (dia ocupado)' },
+                    { kanji: '暇', reading: 'ひま', romaji: 'hima', portuguese: 'livre/ocioso', example: '暇な時間 (tempo livre)' }
+                ],
+                daily: [
+                    { kanji: '週', reading: 'しゅう', romaji: 'shuu', portuguese: 'semana', example: '来週 (próxima semana)' },
+                    { kanji: '月', reading: 'つき', romaji: 'tsuki', portuguese: 'mês', example: '今月 (este mês)' },
+                    { kanji: '年', reading: 'とし', romaji: 'toshi', portuguese: 'ano', example: '来年 (próximo ano)' }
+                ],
+                work: [
+                    { kanji: '社員', reading: 'しゃいん', romaji: 'shain', portuguese: 'funcionário', example: '会社の社員 (funcionário da empresa)' },
+                    { kanji: '給料', reading: 'きゅうりょう', romaji: 'kyuuryou', portuguese: 'salário', example: '給料をもらう (receber salário)' }
+                ],
+                emotions: [
+                    { kanji: '驚く', reading: 'おどろく', romaji: 'odoroku', portuguese: 'surpreender-se', example: '驚いた顔 (cara surpresa)' },
+                    { kanji: '怒る', reading: 'おこる', romaji: 'okoru', portuguese: 'ficar bravo', example: '怒っている人 (pessoa brava)' }
+                ]
+            },
+            B1: {
+                verbs: [
+                    { kanji: '考える', reading: 'かんがえる', romaji: 'kangaeru', portuguese: 'pensar', example: '問題を考える (pensar no problema)' },
+                    { kanji: '決める', reading: 'きめる', romaji: 'kimeru', portuguese: 'decidir', example: '計画を決める (decidir o plano)' },
+                    { kanji: '始める', reading: 'はじめる', romaji: 'hajimeru', portuguese: 'começar', example: '勉強を始める (começar a estudar)' },
+                    { kanji: '終わる', reading: 'おわる', romaji: 'owaru', portuguese: 'terminar', example: '仕事が終わる (trabalho termina)' }
+                ],
+                adjectives: [
+                    { kanji: '難しい', reading: 'むずかしい', romaji: 'muzukashii', portuguese: 'difícil', example: '難しい問題 (problema difícil)' },
+                    { kanji: '簡単', reading: 'かんたん', romaji: 'kantan', portuguese: 'fácil', example: '簡単な質問 (pergunta fácil)' }
+                ],
+                daily: [],
+                work: [],
+                emotions: []
+            },
+            B2: {
+                verbs: [],
+                adjectives: [],
+                daily: [],
+                work: [],
+                emotions: []
+            }
+        };
+
+        // ============================================
+        // EXERCÍCIOS
+        // ============================================
+        const exercises = [
+            {
+                level: 'A1',
+                question: '「行く」の意味は何ですか？',
+                options: ['ir', 'vir', 'fazer', 'ver'],
+                correct: 0
+            },
+            {
+                level: 'A1',
+                question: '「食べる」の読み方は？',
+                options: ['のむ', 'たべる', 'みる', 'いく'],
+                correct: 1
+            },
+            {
+                level: 'A1',
+                question: '「大きい」の反対語は？',
+                options: ['新しい', '小さい', '古い', '高い'],
+                correct: 1
+            },
+            {
+                level: 'A2',
+                question: '「話す」の意味は？',
+                options: ['ouvir', 'falar', 'ler', 'escrever'],
+                correct: 1
+            },
+            {
+                level: 'A2',
+                question: '「暑い」は何を表しますか？',
+                options: ['temperatura quente', 'temperatura fria', 'sentimento', 'tamanho'],
+                correct: 0
+            },
+            {
+                level: 'B1',
+                question: '「考える」の読み方は？',
+                options: ['きめる', 'かんがえる', 'はじめる', 'おわる'],
+                correct: 1
+            }
+        ];
+
+        // ============================================
+        // ESTADO DA APLICAÇÃO
+        // ============================================
+        let currentLevel = 'A1';
+        let currentCategory = 'all';
+        let currentFlashcardIndex = 0;
+        let flashcardSide = 'front';
+        let currentExerciseIndex = 0;
+        let score = 0;
+        let totalExercises = 0;
+        let correctAnswers = 0;
+
+        // Progresso do usuário
+        let progress = JSON.parse(localStorage.getItem('japaneseAppProgress')) || {
+            learnedWords: [],
+            exercisesCompleted: 0,
+            correctAnswers: 0,
+            totalAttempts: 0,
+            categoryProgress: {}
+        };
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeNavigation();
+            initializeTheme();
+            initializeLevelSelector();
+            initializeCategorySelector();
+            initializeVocabulary();
+            initializeFlashcards();
+            initializeExercises();
+            initializeProgress();
+            updateProgressDisplay();
+        });
+
+        // ============================================
+        // NAVEGAÇÃO
+        // ============================================
+        function initializeNavigation() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const pages = document.querySelectorAll('.page');
+
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetPage = btn.getAttribute('data-page');
+                    
+                    navButtons.forEach(b => b.classList.remove('active'));
+                    pages.forEach(p => p.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(targetPage).classList.add('active');
+                });
+            });
+        }
+
+        // ============================================
+        // TEMA ESCURO/CLARO
+        // ============================================
+        function initializeTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            themeToggle.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            });
+        }
+
+        // ============================================
+        // SELETOR DE NÍVEL
+        // ============================================
+        function initializeLevelSelector() {
+            const levelButtons = document.querySelectorAll('.level-btn');
+            
+            levelButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    levelButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentLevel = btn.getAttribute('data-level');
+                    initializeVocabulary();
+                    showNextFlashcard();
+                });
+            });
+        }
+
+        // ============================================
+        // SELETOR DE CATEGORIA
+        // ============================================
+        function initializeCategorySelector() {
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.getAttribute('data-category');
+                    initializeVocabulary();
+                });
+            });
+        }
+
+        // ============================================
+        // VOCABULÁRIO
+        // ============================================
+        function initializeVocabulary() {
+            const grid = document.getElementById('vocabularyGrid');
+            grid.innerHTML = '';
+            
+            const levelData = vocabularyData[currentLevel];
+            if (!levelData) return;
+            
+            let words = [];
+            
+            if (currentCategory === 'all') {
+                Object.values(levelData).forEach(category => {
+                    words = words.concat(category);
+                });
+            } else {
+                words = levelData[currentCategory] || [];
+            }
+            
+            words.forEach(word => {
+                const card = createVocabCard(word);
+                grid.appendChild(card);
+            });
+        }
+
+        function createVocabCard(word) {
+            const card = document.createElement('div');
+            card.className = 'vocab-card';
+            
+            const wordKey = word.kanji || word.reading;
+            const isLearned = progress.learnedWords.includes(wordKey);
+            if (isLearned) {
+                card.classList.add('learned');
+            }
+            
+            card.innerHTML = `
+                <div class="vocab-kanji">${word.kanji}</div>
+                <div class="vocab-reading">${word.reading} (${word.romaji})</div>
+                <div class="vocab-portuguese">${word.portuguese}</div>
+                <div class="vocab-example">${word.example}</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                if (!isLearned) {
+                    progress.learnedWords.push(wordKey);
+                    card.classList.add('learned');
+                    saveProgress();
+                    updateProgressDisplay();
+                }
+            });
+            
+            return card;
+        }
+
+        // ============================================
+        // FLASHCARDS
+        // ============================================
+        function initializeFlashcards() {
+            const flipBtn = document.getElementById('flipCard');
+            const nextBtn = document.getElementById('nextCard');
+            const flashcard = document.getElementById('flashcard');
+            
+            flipBtn.addEventListener('click', () => {
+                flashcard.classList.toggle('flipped');
+                flashcardSide = flashcardSide === 'front' ? 'back' : 'front';
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                showNextFlashcard();
+            });
+            
+            flashcard.addEventListener('click', () => {
+                flashcard.classList.toggle('flipped');
+                flashcardSide = flashcardSide === 'front' ? 'back' : 'front';
+            });
+            
+            showNextFlashcard();
+        }
+
+        function showNextFlashcard() {
+            const levelData = vocabularyData[currentLevel];
+            if (!levelData) return;
+            
+            const allWords = [];
+            
+            Object.values(levelData).forEach(category => {
+                allWords.push(...category);
+            });
+            
+            if (allWords.length === 0) return;
+            
+            currentFlashcardIndex = (currentFlashcardIndex + 1) % allWords.length;
+            const word = allWords[currentFlashcardIndex];
+            
+            const flashcard = document.getElementById('flashcard');
+            const flashcardText = document.getElementById('flashcardText');
+            const flashcardBackText = document.getElementById('flashcardBackText');
+            const currentCardSpan = document.getElementById('currentCard');
+            const totalCardsSpan = document.getElementById('totalCards');
+            
+            flashcard.classList.remove('flipped');
+            flashcardSide = 'front';
+            
+            flashcardText.innerHTML = `
+                <div class="flashcard-text">${word.kanji}</div>
+                <div class="flashcard-reading">${word.reading}</div>
+            `;
+            
+            flashcardBackText.innerHTML = `
+                <div class="flashcard-portuguese">${word.portuguese}</div>
+                <div class="flashcard-reading">${word.romaji}</div>
+                <div class="flashcard-example">${word.example}</div>
+            `;
+            
+            currentCardSpan.textContent = currentFlashcardIndex + 1;
+            totalCardsSpan.textContent = allWords.length;
+        }
+
+        // ============================================
+        // EXERCÍCIOS
+        // ============================================
+        function initializeExercises() {
+            showExercise();
+            
+            const nextBtn = document.getElementById('nextExercise');
+            nextBtn.addEventListener('click', () => {
+                currentExerciseIndex = (currentExerciseIndex + 1) % exercises.length;
+                showExercise();
+            });
+        }
+
+        function showExercise() {
+            // Filtrar exercícios por nível atual
+            const levelExercises = exercises.filter(ex => ex.level === currentLevel);
+            if (levelExercises.length === 0) {
+                // Se não houver exercícios do nível atual, usar todos
+                currentExerciseIndex = (currentExerciseIndex + 1) % exercises.length;
+            } else {
+                const indexInLevel = currentExerciseIndex % levelExercises.length;
+                currentExerciseIndex = exercises.indexOf(levelExercises[indexInLevel]);
+            }
+            
+            const exercise = exercises[currentExerciseIndex];
+            const questionEl = document.getElementById('exerciseQuestion');
+            const optionsEl = document.getElementById('exerciseOptions');
+            const feedbackEl = document.getElementById('exerciseFeedback');
+            const nextBtn = document.getElementById('nextExercise');
+            
+            questionEl.textContent = exercise.question;
+            optionsEl.innerHTML = '';
+            feedbackEl.classList.remove('show', 'correct', 'incorrect');
+            nextBtn.style.display = 'none';
+            
+            exercise.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.addEventListener('click', () => checkAnswer(index, exercise.correct, btn, feedbackEl, nextBtn));
+                optionsEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, correctIndex, btn, feedbackEl, nextBtn) {
+            const allOptions = document.querySelectorAll('.option-btn');
+            allOptions.forEach(opt => opt.disabled = true);
+            
+            if (selectedIndex === correctIndex) {
+                btn.classList.add('correct');
+                feedbackEl.textContent = '✓ Correto! Parabéns!';
+                feedbackEl.classList.add('show', 'correct');
+                score++;
+                correctAnswers++;
+                progress.correctAnswers++;
+            } else {
+                btn.classList.add('incorrect');
+                allOptions[correctIndex].classList.add('correct');
+                feedbackEl.textContent = `✗ Incorreto. A resposta correta é: ${exercises[currentExerciseIndex].options[correctIndex]}`;
+                feedbackEl.classList.add('show', 'incorrect');
+            }
+            
+            totalExercises++;
+            progress.exercisesCompleted++;
+            progress.totalAttempts++;
+            saveProgress();
+            updateProgressDisplay();
+            
+            nextBtn.style.display = 'block';
+        }
+
+        // ============================================
+        // PROGRESSO
+        // ============================================
+        function initializeProgress() {
+            const resetBtn = document.getElementById('resetProgress');
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja resetar todo o progresso?')) {
+                    progress = {
+                        learnedWords: [],
+                        exercisesCompleted: 0,
+                        correctAnswers: 0,
+                        totalAttempts: 0,
+                        categoryProgress: {}
+                    };
+                    saveProgress();
+                    updateProgressDisplay();
+                    initializeVocabulary();
+                    alert('Progresso resetado!');
+                }
+            });
+        }
+
+        function updateProgressDisplay() {
+            document.getElementById('wordsLearned').textContent = progress.learnedWords.length;
+            document.getElementById('exercisesCompleted').textContent = progress.exercisesCompleted;
+            
+            const accuracy = progress.totalAttempts > 0 
+                ? Math.round((progress.correctAnswers / progress.totalAttempts) * 100) 
+                : 0;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            // Atualizar progresso por categoria
+            updateCategoryProgress();
+        }
+
+        function updateCategoryProgress() {
+            const container = document.getElementById('categoryProgress');
+            container.innerHTML = '';
+            
+            const categories = ['verbs', 'adjectives', 'daily', 'work', 'emotions'];
+            
+            categories.forEach(category => {
+                const levelData = vocabularyData[currentLevel];
+                if (!levelData) return;
+                
+                const words = levelData[category] || [];
+                const learned = words.filter(w => {
+                    const wordKey = w.kanji || w.reading;
+                    return progress.learnedWords.includes(wordKey);
+                }).length;
+                const percentage = words.length > 0 ? Math.round((learned / words.length) * 100) : 0;
+                
+                const item = document.createElement('div');
+                item.className = 'category-progress-item';
+                item.innerHTML = `
+                    <div class="category-progress-label">
+                        <span>${getCategoryName(category)}</span>
+                        <span>${learned}/${words.length}</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" style="width: ${percentage}%">${percentage}%</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                verbs: 'Verbos',
+                adjectives: 'Adjetivos',
+                daily: 'Vida Diária',
+                work: 'Trabalho',
+                emotions: 'Emoções'
+            };
+            return names[category] || category;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('japaneseAppProgress', JSON.stringify(progress));
+        }
+    </script>
+</body>
+</html>
